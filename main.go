@@ -1,15 +1,17 @@
 package main
 
-import "net/http"
+import (
+	"highloadcup/travels/api"
+)
 
-func DumbHandler(writer http.ResponseWriter, request *http.Request) {
-	writer.Write([]byte("Hello, I'm Web Server!"))
-}
+//func DumbHandler(writer http.ResponseWriter, request *http.Request) {
+//	writer.Write([]byte("Hello, I'm Web Server!"))
+//}
 
 func main() {
 	api.Run()
-	http.HandleFunc("/", DumbHandler)
-	http.ListenAndServe(":80", nil)
+	//http.HandleFunc("/", DumbHandler)
+	//http.ListenAndServe(":80", nil)
 
 }
 

@@ -1,10 +1,7 @@
 package db
 
 import (
-	"fmt"
-
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/mssql"
+	"github.com/hashicorp/go-memdb"
 )
 
 type Config struct {
@@ -17,17 +14,52 @@ type Config struct {
 	MaxIdleConns int
 }
 
-var CRMDB *gorm.DB
+var DB *memdb.MemDB
 
-func Open(c *Config) (db *gorm.DB, err error) {
-	connString := fmt.Sprintf("server=%s;user id=%s;password=%s;port=%d;database=%s;ApplicationIntent=ReadOnly", c.Host, c.User, c.Password, c.Port, c.DBName)
+func Open() (*memdb.MemDB, error) {
 
-	dbConnection, err := gorm.Open("mssql", connString)
-	if err != nil {
-		return nil, fmt.Errorf("Error while connecting to db %v", err)
+	// Create the DB schema
+	schema := &memdb.DBSchema{
+		Tables: map[string]*memdb.TableSchema{
+			"person": &memdb.TableSchema{
+				Name: "person",
+				Indexes: map[string]*memdb.IndexSchema{
+					"id": &memdb.IndexSchema{
+						Name:    "id",
+						Unique:  true,
+						Indexer: &memdb.StringFieldIndex{Field: "Id"},
+					},
+					"age": &memdb.IndexSchema{
+						Name:    "age",
+						Unique:  false,
+						Indexer: &memdb.IntFieldIndex{Field: "Age"},
+					},
+					"gender": &memdb.IndexSchema{
+						Name:    "gender",
+						Unique:  false,
+						Indexer: &memdb.IntFieldIndex{Field: "Gender"},
+					},
+				},
+			},
+		},
 	}
-	dbConnection.DB().SetMaxIdleConns(10)
-	dbConnection.DB().SetMaxOpenConns(100)
 
-	return dbConnection, nil
+	dbConnection, err := memdb.NewMemDB(schema)
+	return dbConnection, err
+
 }
+
+//var CRMDB *gorm.DB
+//
+//func Open(c *Config) (db *gorm.DB, err error) {
+//	connString := fmt.Sprintf("server=%s;user id=%s;password=%s;port=%d;database=%s", c.Host, c.User, c.Password, c.Port, c.DBName)
+//
+//	dbConnection, err := gorm.Open("mssql", connString)
+//	if err != nil {
+//		return nil, fmt.Errorf("Error while connecting to db %v", err)
+//	}
+//	dbConnection.DB().SetMaxIdleConns(10)
+//	dbConnection.DB().SetMaxOpenConns(100)
+//
+//	return dbConnection, nil
+//}

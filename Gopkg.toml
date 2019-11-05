@@ -30,20 +30,12 @@
   version = "1.4.0"
 
 [[constraint]]
-  name = "github.com/opentracing/opentracing-go"
-  version = "1.1.0"
-
-[[constraint]]
   branch = "master"
   name = "github.com/semihalev/gin-stats"
 
 [[constraint]]
   name = "gopkg.in/reform.v1"
   version = "1.3.3"
-
-[[constraint]]
-  branch = "v2"
-  name = "gopkg.in/robfig/cron.v2"
 
 [prune]
   go-tests = true

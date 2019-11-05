@@ -10,19 +10,6 @@
   version = "v0.3.1"
 
 [[projects]]
-  branch = "master"
-  digest = "1:604736820765267566a4add60d6d656fda085f1d01fc134eb09bbf648da8d902"
-  name = "github.com/denisenkom/go-mssqldb"
-  packages = [
-    ".",
-    "internal/cp",
-    "internal/decimal",
-    "internal/querytext",
-  ]
-  pruneopts = "UT"
-  revision = "cfbb681360f0a7de54ae77703318f0e60d422e00"
-
-[[projects]]
   digest = "1:a4b5a6b32f33323c7850fae4ec085a0fbac3be93c057b6b8cef5bcabe24645ac"
   name = "github.com/gin-contrib/sse"
   packages = ["."]
@@ -43,14 +30,6 @@
   version = "v1.4.0"
 
 [[projects]]
-  branch = "master"
-  digest = "1:914bae0d7af57d7f9c2c8eff864071e57c3effebd78eeef26eff4afb0372ed2f"
-  name = "github.com/golang-sql/civil"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "cb61b32ac6fe84d34b81730175f91965e43d0f90"
-
-[[projects]]
   digest = "1:318f1c959a8a740366fce4b1e1eb2fd914036b4af58fbd0a003349b305f118ad"
   name = "github.com/golang/protobuf"
   packages = ["proto"]
@@ -59,23 +38,28 @@
   version = "v1.3.0"
 
 [[projects]]
-  digest = "1:45c1024ef1a0945cb1a2bffa8bed3b636f5fcf9e211b0367d3a876469e38a3f3"
-  name = "github.com/jinzhu/gorm"
-  packages = [
-    ".",
-    "dialects/mssql",
-  ]
-  pruneopts = "UT"
-  revision = "81c17a7e2529c59efc4e74c5b32c1fb71fb12fa2"
-  version = "v1.9.11"
-
-[[projects]]
-  digest = "1:01ed62f8f4f574d8aff1d88caee113700a2b44c42351943fa73cc1808f736a50"
-  name = "github.com/jinzhu/inflection"
+  digest = "1:6e9806a06d00f4d1f90806d7b5cfb11e35dca76503390ca6e704b05ea7051bff"
+  name = "github.com/hashicorp/go-immutable-radix"
   packages = ["."]
   pruneopts = "UT"
-  revision = "f5c5f50e6090ae76a29240b61ae2a90dd810112e"
-  version = "v1.0.0"
+  revision = "7dd1121b595e4e1bd6dd5caa78e0f5c454740379"
+  version = "v1.1.0"
+
+[[projects]]
+  digest = "1:d3e56a1197f7ec189ca1267b10f856de9bb93620ca913b77ece6b37363a614a7"
+  name = "github.com/hashicorp/go-memdb"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "e3965aaa499eb83f14b147b83866658476828b3f"
+  version = "v1.0.4"
+
+[[projects]]
+  digest = "1:7fae9ec96d10b2afce0da23c378c8b3389319b7f92fa092f2621bba3078cfb4b"
+  name = "github.com/hashicorp/golang-lru"
+  packages = ["simplelru"]
+  pruneopts = "UT"
+  revision = "7f827b33c0f158ec5dfbba01bb0b14a4541fd81d"
+  version = "v0.5.3"
 
 [[projects]]
   digest = "1:ecd9aa82687cf31d1585d4ac61d0ba180e42e8a6182b85bd785fcca8dfeefc1b"
@@ -201,14 +185,6 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:100a36e16f77aaad7c9144ab26bcefb92c5b6ebed5b137f935fdc11f541fa5b8"
-  name = "golang.org/x/crypto"
-  packages = ["md4"]
-  pruneopts = "UT"
-  revision = "8986dd9e96cf0a6f74da406c005ba3df38527c04"
-
-[[projects]]
-  branch = "master"
   digest = "1:21d7bad9b7da270fd2d50aba8971a041bd691165c95096a2a4c68db823cbc86a"
   name = "golang.org/x/lint"
   packages = [
@@ -270,14 +246,6 @@
   version = "v1.3.3"
 
 [[projects]]
-  branch = "v2"
-  digest = "1:e8c48aa61ea272e211858e52979ad4d114c60bfe6900d12431ac697482100b0a"
-  name = "gopkg.in/robfig/cron.v2"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "be2e0b0deed5a68ffee390b4583a13aff8321535"
-
-[[projects]]
   digest = "1:4d2e5a73dc1500038e504a8d78b986630e3626dc027bc030ba5c75da257cdb96"
   name = "gopkg.in/yaml.v2"
   packages = ["."]
@@ -324,8 +292,7 @@
   analyzer-version = 1
   input-imports = [
     "github.com/gin-gonic/gin",
-    "github.com/jinzhu/gorm",
-    "github.com/jinzhu/gorm/dialects/mssql",
+    "github.com/hashicorp/go-memdb",
     "github.com/joho/godotenv",
     "github.com/opentracing/opentracing-go",
     "github.com/satori/go.uuid",
@@ -334,7 +301,6 @@
     "go.uber.org/zap/zapcore",
     "gopkg.in/reform.v1",
     "gopkg.in/reform.v1/parse",
-    "gopkg.in/robfig/cron.v2",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1

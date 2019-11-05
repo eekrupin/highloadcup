@@ -73,7 +73,7 @@ func init() {
 	Config.DBConfig.MaxOpenConns = maxOpenConns
 	Config.DBConfig.MaxIdleConns = maxIdleConns
 
-	db.CRMDB, err = db.Open(Config.DBConfig)
+	db.DB, err = db.Open()
 	if err != nil {
 		panic(err)
 	}
