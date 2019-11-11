@@ -22,7 +22,6 @@ func User(c *gin.Context) {
 	if err != nil || raw == nil {
 		c.AbortWithStatus(404)
 	}
-	tnx.Commit()
 
 	resp := map[string]string{"status": raw.(*models.User).Last_name}
 	c.JSON(200, resp)
@@ -33,7 +32,48 @@ func User(c *gin.Context) {
 }
 
 func CreateUser(c *gin.Context) {
-	id, err := strconv.Atoi(c.Param("id"))
+
+	var userRaw models.UserRaw
+	err := c.BindJSON(&userRaw)
+	if err != nil || userRaw.Id == 0 {
+		c.AbortWithStatus(404)
+		return
+	}
+
+	tnx := db.DB.Txn(false)
+	raw, err := tnx.First("user", "id", userRaw.Id)
+	if err != nil || raw != nil {
+		c.AbortWithStatus(400)
+		return
+	}
+
+	birth_date := time.Unix(int64(userRaw.Birth_date), 0)
+
+	Age, _ := monthYearDiff(birth_date, time.Now())
+	user := models.User{Id: userRaw.Id, Birth_date: birth_date, Email: userRaw.Email, Gender: userRaw.Gender, Last_name: userRaw.Last_name, Age: Age}
+
+	tnx = db.DB.Txn(true)
+	err = tnx.Insert("user", &user)
+	if err != nil {
+		c.AbortWithStatus(404)
+		return
+	}
+	tnx.Commit()
+
+	resp := map[string]string{}
+	c.JSON(200, resp)
+
+	c.Abort()
+}
+
+func PostUser(c *gin.Context) {
+	key := c.Param("id")
+	if key == "new" {
+		CreateUser(c)
+		return
+	}
+
+	id, err := strconv.Atoi(key)
 	if err != nil {
 		c.AbortWithStatus(404)
 		return
@@ -46,17 +86,19 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 
-	//int_birth_date, err := strconv.Atoi(userRaw.Birth_date)
-	//if err != nil {
-	//	c.AbortWithStatus(404)
-	//	return
-	//}
 	birth_date := time.Unix(int64(userRaw.Birth_date), 0)
 
 	Age, _ := monthYearDiff(birth_date, time.Now())
 	user := models.User{Id: uint32(id), Birth_date: birth_date, Email: userRaw.Email, Gender: userRaw.Gender, Last_name: userRaw.Last_name, Age: Age}
 
-	tnx := db.DB.Txn(true)
+	tnx := db.DB.Txn(false)
+	raw, err := tnx.First("user", "id", uint32(id))
+	if err != nil || raw == nil {
+		c.AbortWithStatus(404)
+		return
+	}
+
+	tnx = db.DB.Txn(true)
 	err = tnx.Insert("user", &user)
 	if err != nil {
 		c.AbortWithStatus(404)
@@ -66,8 +108,6 @@ func CreateUser(c *gin.Context) {
 
 	resp := map[string]string{}
 	c.JSON(200, resp)
-	//c.Set(config.KeyResponse, resp)
-	//c.JSON(http.StatusOK, map[string]string{"error": err.Error()})
 
 	c.Abort()
 }

@@ -17,9 +17,9 @@ type User struct {
 
 type UserRaw struct {
 	Id         uint32 `json:"id"`
-	Email      string `json:"email"`
-	First_name string `json:"first_name"`
-	Last_name  string `json:"last_name"`
-	Gender     string `json:"gender"`
-	Birth_date uint32 `json:"birth_date"`
+	Email      string `json:"email" binding:"required,emailCheck"`
+	First_name string `json:"first_name" binding:"required"`
+	Last_name  string `json:"last_name" binding:"required"`
+	Gender     string `json:"gender" binding:"required"`
+	Birth_date uint32 `json:"birth_date" binding:"required"`
 }

@@ -2,19 +2,24 @@ package api
 
 import (
 	"context"
-	"github.com/gin-gonic/gin"
-	//"github.com/opentracing/opentracing-go"
-	"github.com/semihalev/gin-stats"
-	"highloadcup/travels/api/httpHandlers"
-	"highloadcup/travels/api/middlewares"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
+	"reflect"
+	"regexp"
 	"strconv"
 	"time"
 
+	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/semihalev/gin-stats"
+	"gopkg.in/go-playground/validator.v8"
+
+	"highloadcup/travels/api/httpHandlers"
+	"highloadcup/travels/api/middlewares"
 	"highloadcup/travels/config"
+	//"github.com/opentracing/opentracing-go"
 )
 
 func Run() {
@@ -36,6 +41,10 @@ func Run() {
 		//jsonEP.POST("/review/list", httpHandlers.ReviewListRequestHandler)
 	}*/
 
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		v.RegisterValidation("emailCheck", emailCheck)
+	}
+
 	otherEP := r.Group("/")
 	{
 		//otherEP.GET("/stats", func(c *gin.Context) {
@@ -45,7 +54,8 @@ func Run() {
 		otherEP.POST("/health", httpHandlers.Health)
 
 		otherEP.GET("/user/:id", httpHandlers.User)
-		otherEP.POST("/user/:id", httpHandlers.CreateUser)
+
+		otherEP.POST("/user/:id", httpHandlers.PostUser)
 	}
 
 	srv := &http.Server{
@@ -76,4 +86,15 @@ func Run() {
 
 	log.Println("Server exiting")
 
+}
+
+func emailCheck(
+	v *validator.Validate, topStruct reflect.Value, currentStructOrField reflect.Value,
+	field reflect.Value, fieldType reflect.Type, fieldKind reflect.Kind, param string,
+) bool {
+	if email, ok := field.Interface().(string); ok {
+		re := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
+		return re.MatchString(email)
+	}
+	return false
 }
