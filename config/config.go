@@ -51,7 +51,7 @@ func init() {
 
 	//DB_HOST=DB_HOST;DB_PORT=1433;DB_NAME=DB_NAME;DB_USER=DB_USER;DB_PASSWORD=DB_PASSWORD;DB_MAX_OPEN_CONNS=100;DB_MAX_IDLE_CONNS=10;HTTP_INTERNAL_SERVER_PORT=8080
 
-	Config.DBConfig.Host = os.Getenv("DB_HOST")
+	/*Config.DBConfig.Host = os.Getenv("DB_HOST")
 	DBPort, err := strconv.Atoi(os.Getenv("DB_PORT"))
 	if err != nil {
 		panic("Variable PORT from file .env must be int")
@@ -64,14 +64,14 @@ func init() {
 	maxIdleConns, err := strconv.Atoi(os.Getenv("DB_MAX_IDLE_CONNS"))
 	if err != nil {
 		panic("Variable DB_MAX_IDLE_CONNS from file .env must be int")
-	}
+	}*/
 
-	Config.DBConfig.Port = DBPort
-	Config.DBConfig.DBName = os.Getenv("DB_NAME")
-	Config.DBConfig.User = os.Getenv("DB_USER")
-	Config.DBConfig.Password = os.Getenv("DB_PASSWORD")
-	Config.DBConfig.MaxOpenConns = maxOpenConns
-	Config.DBConfig.MaxIdleConns = maxIdleConns
+	//Config.DBConfig.Port = DBPort
+	//Config.DBConfig.DBName = os.Getenv("DB_NAME")
+	//Config.DBConfig.User = os.Getenv("DB_USER")
+	//Config.DBConfig.Password = os.Getenv("DB_PASSWORD")
+	//Config.DBConfig.MaxOpenConns = maxOpenConns
+	//Config.DBConfig.MaxIdleConns = maxIdleConns
 
 	db.DB, err = db.Open()
 	if err != nil {

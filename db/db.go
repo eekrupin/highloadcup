@@ -21,13 +21,13 @@ func Open() (*memdb.MemDB, error) {
 	// Create the DB schema
 	schema := &memdb.DBSchema{
 		Tables: map[string]*memdb.TableSchema{
-			"person": &memdb.TableSchema{
-				Name: "person",
+			"user": &memdb.TableSchema{
+				Name: "user",
 				Indexes: map[string]*memdb.IndexSchema{
 					"id": &memdb.IndexSchema{
 						Name:    "id",
 						Unique:  true,
-						Indexer: &memdb.StringFieldIndex{Field: "Id"},
+						Indexer: &memdb.UintFieldIndex{Field: "Id"},
 					},
 					"age": &memdb.IndexSchema{
 						Name:    "age",
@@ -37,7 +37,47 @@ func Open() (*memdb.MemDB, error) {
 					"gender": &memdb.IndexSchema{
 						Name:    "gender",
 						Unique:  false,
-						Indexer: &memdb.IntFieldIndex{Field: "Gender"},
+						Indexer: &memdb.StringFieldIndex{Field: "Gender"},
+					},
+				},
+			},
+			"location": &memdb.TableSchema{
+				Name: "location",
+				Indexes: map[string]*memdb.IndexSchema{
+					"id": &memdb.IndexSchema{
+						Name:    "id",
+						Unique:  true,
+						Indexer: &memdb.UintFieldIndex{Field: "Id"},
+					},
+					"city": &memdb.IndexSchema{
+						Name:    "city",
+						Unique:  false,
+						Indexer: &memdb.StringFieldIndex{Field: "City"},
+					},
+					"place": &memdb.IndexSchema{
+						Name:    "place",
+						Unique:  false,
+						Indexer: &memdb.StringFieldIndex{Field: "Place"},
+					},
+				},
+			},
+			"visit": &memdb.TableSchema{
+				Name: "visit",
+				Indexes: map[string]*memdb.IndexSchema{
+					"id": &memdb.IndexSchema{
+						Name:    "id",
+						Unique:  true,
+						Indexer: &memdb.UintFieldIndex{Field: "Id"},
+					},
+					"user": &memdb.IndexSchema{
+						Name:    "user",
+						Unique:  false,
+						Indexer: &memdb.IntFieldIndex{Field: "User"},
+					},
+					"location": &memdb.IndexSchema{
+						Name:    "location",
+						Unique:  false,
+						Indexer: &memdb.IntFieldIndex{Field: "Location"},
 					},
 				},
 			},

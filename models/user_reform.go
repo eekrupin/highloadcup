@@ -10,62 +10,63 @@ import (
 	"gopkg.in/reform.v1/parse"
 )
 
-type personTableType struct {
+type userTableType struct {
 	s parse.StructInfo
 	z []interface{}
 }
 
 // Schema returns a schema name in SQL database ("").
-func (v *personTableType) Schema() string {
+func (v *userTableType) Schema() string {
 	return v.s.SQLSchema
 }
 
-// Name returns a view or table name in SQL database ("person").
-func (v *personTableType) Name() string {
+// Name returns a view or table name in SQL database ("user").
+func (v *userTableType) Name() string {
 	return v.s.SQLName
 }
 
 // Columns returns a new slice of column names for that view or table in SQL database.
-func (v *personTableType) Columns() []string {
-	return []string{"id", "email", "first_name", "last_name", "gender", "birth_date"}
+func (v *userTableType) Columns() []string {
+	return []string{"id", "email", "first_name", "last_name", "gender", "birth_date", "age"}
 }
 
 // NewStruct makes a new struct for that view or table.
-func (v *personTableType) NewStruct() reform.Struct {
-	return new(Person)
+func (v *userTableType) NewStruct() reform.Struct {
+	return new(User)
 }
 
 // NewRecord makes a new record for that table.
-func (v *personTableType) NewRecord() reform.Record {
-	return new(Person)
+func (v *userTableType) NewRecord() reform.Record {
+	return new(User)
 }
 
 // PKColumnIndex returns an index of primary key column for that table in SQL database.
-func (v *personTableType) PKColumnIndex() uint {
+func (v *userTableType) PKColumnIndex() uint {
 	return uint(v.s.PKFieldIndex)
 }
 
-// PersonTable represents person view or table in SQL database.
-var PersonTable = &personTableType{
-	s: parse.StructInfo{Type: "Person", SQLSchema: "", SQLName: "person", Fields: []parse.FieldInfo{{Name: "Id", Type: "uint32", Column: "id"}, {Name: "Email", Type: "string", Column: "email"}, {Name: "First_name", Type: "string", Column: "first_name"}, {Name: "Last_name", Type: "string", Column: "last_name"}, {Name: "Gender", Type: "string", Column: "gender"}, {Name: "Birth_date", Type: "time.Time", Column: "birth_date"}}, PKFieldIndex: 0},
-	z: new(Person).Values(),
+// UserTable represents user view or table in SQL database.
+var UserTable = &userTableType{
+	s: parse.StructInfo{Type: "User", SQLSchema: "", SQLName: "user", Fields: []parse.FieldInfo{{Name: "Id", Type: "uint32", Column: "id"}, {Name: "Email", Type: "string", Column: "email"}, {Name: "First_name", Type: "string", Column: "first_name"}, {Name: "Last_name", Type: "string", Column: "last_name"}, {Name: "Gender", Type: "string", Column: "gender"}, {Name: "Birth_date", Type: "time.Time", Column: "birth_date"}, {Name: "Age", Type: "int", Column: "age"}}, PKFieldIndex: 0},
+	z: new(User).Values(),
 }
 
 // String returns a string representation of this struct or record.
-func (s Person) String() string {
-	res := make([]string, 6)
+func (s User) String() string {
+	res := make([]string, 7)
 	res[0] = "Id: " + reform.Inspect(s.Id, true)
 	res[1] = "Email: " + reform.Inspect(s.Email, true)
 	res[2] = "First_name: " + reform.Inspect(s.First_name, true)
 	res[3] = "Last_name: " + reform.Inspect(s.Last_name, true)
 	res[4] = "Gender: " + reform.Inspect(s.Gender, true)
 	res[5] = "Birth_date: " + reform.Inspect(s.Birth_date, true)
+	res[6] = "Age: " + reform.Inspect(s.Age, true)
 	return strings.Join(res, ", ")
 }
 
 // Values returns a slice of struct or record field values.
 // Returned interface{} values are never untyped nils.
-func (s *Person) Values() []interface{} {
+func (s *User) Values() []interface{} {
 	return []interface{}{
 		s.Id,
 		s.Email,
@@ -73,12 +74,13 @@ func (s *Person) Values() []interface{} {
 		s.Last_name,
 		s.Gender,
 		s.Birth_date,
+		s.Age,
 	}
 }
 
 // Pointers returns a slice of pointers to struct or record fields.
 // Returned interface{} values are never untyped nils.
-func (s *Person) Pointers() []interface{} {
+func (s *User) Pointers() []interface{} {
 	return []interface{}{
 		&s.Id,
 		&s.Email,
@@ -86,38 +88,39 @@ func (s *Person) Pointers() []interface{} {
 		&s.Last_name,
 		&s.Gender,
 		&s.Birth_date,
+		&s.Age,
 	}
 }
 
 // View returns View object for that struct.
-func (s *Person) View() reform.View {
-	return PersonTable
+func (s *User) View() reform.View {
+	return UserTable
 }
 
 // Table returns Table object for that record.
-func (s *Person) Table() reform.Table {
-	return PersonTable
+func (s *User) Table() reform.Table {
+	return UserTable
 }
 
 // PKValue returns a value of primary key for that record.
 // Returned interface{} value is never untyped nil.
-func (s *Person) PKValue() interface{} {
+func (s *User) PKValue() interface{} {
 	return s.Id
 }
 
 // PKPointer returns a pointer to primary key field for that record.
 // Returned interface{} value is never untyped nil.
-func (s *Person) PKPointer() interface{} {
+func (s *User) PKPointer() interface{} {
 	return &s.Id
 }
 
 // HasPK returns true if record has non-zero primary key set, false otherwise.
-func (s *Person) HasPK() bool {
-	return s.Id != PersonTable.z[PersonTable.s.PKFieldIndex]
+func (s *User) HasPK() bool {
+	return s.Id != UserTable.z[UserTable.s.PKFieldIndex]
 }
 
 // SetPK sets record primary key.
-func (s *Person) SetPK(pk interface{}) {
+func (s *User) SetPK(pk interface{}) {
 	if i64, ok := pk.(int64); ok {
 		s.Id = uint32(i64)
 	} else {
@@ -127,13 +130,13 @@ func (s *Person) SetPK(pk interface{}) {
 
 // check interfaces
 var (
-	_ reform.View   = PersonTable
-	_ reform.Struct = (*Person)(nil)
-	_ reform.Table  = PersonTable
-	_ reform.Record = (*Person)(nil)
-	_ fmt.Stringer  = (*Person)(nil)
+	_ reform.View   = UserTable
+	_ reform.Struct = (*User)(nil)
+	_ reform.Table  = UserTable
+	_ reform.Record = (*User)(nil)
+	_ fmt.Stringer  = (*User)(nil)
 )
 
 func init() {
-	parse.AssertUpToDate(&PersonTable.s, new(Person))
+	parse.AssertUpToDate(&UserTable.s, new(User))
 }

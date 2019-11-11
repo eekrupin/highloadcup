@@ -36,13 +36,16 @@ func Run() {
 		//jsonEP.POST("/review/list", httpHandlers.ReviewListRequestHandler)
 	}*/
 
-	otherEP := r.Group("/api")
+	otherEP := r.Group("/")
 	{
 		//otherEP.GET("/stats", func(c *gin.Context) {
 		//	c.JSON(http.StatusOK, stats.Report())
 		//})
 		otherEP.GET("/health", httpHandlers.Health)
 		otherEP.POST("/health", httpHandlers.Health)
+
+		otherEP.GET("/user/:id", httpHandlers.User)
+		otherEP.POST("/user/:id", httpHandlers.CreateUser)
 	}
 
 	srv := &http.Server{
