@@ -1,8 +1,10 @@
 package db
 
 import (
-	"github.com/hashicorp/go-memdb"
+	"database/sql"
+	"fmt"
 )
+import _ "github.com/go-sql-driver/mysql"
 
 type Config struct {
 	Host         string
@@ -14,7 +16,7 @@ type Config struct {
 	MaxIdleConns int
 }
 
-var DB *memdb.MemDB
+/*var DB *memdb.MemDB
 
 func Open() (*memdb.MemDB, error) {
 
@@ -87,10 +89,22 @@ func Open() (*memdb.MemDB, error) {
 	dbConnection, err := memdb.NewMemDB(schema)
 	return dbConnection, err
 
+}*/
+
+var DB *sql.DB
+
+func Open(c *Config) (dbConnection *sql.DB, err error) {
+	dataSourceName := fmt.Sprint(c.Host, ":", c.Password, "@tcp(", c.Host, ":", c.Port, ")/", c.DBName) //"username:password@tcp(127.0.0.1:3306)/test"
+	dbConnection, err = sql.Open("mysql", dataSourceName)
+	if err != nil {
+		return nil, fmt.Errorf("Error while connecting to db %v", err)
+	}
+
+	return dbConnection, nil
 }
 
 //var CRMDB *gorm.DB
-//
+
 //func Open(c *Config) (db *gorm.DB, err error) {
 //	connString := fmt.Sprintf("server=%s;user id=%s;password=%s;port=%d;database=%s", c.Host, c.User, c.Password, c.Port, c.DBName)
 //

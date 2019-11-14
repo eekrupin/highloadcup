@@ -4,57 +4,45 @@ import (
 	"github.com/gin-gonic/gin"
 	"highloadcup/travels/db"
 	"highloadcup/travels/models"
+	"highloadcup/travels/modules"
+	"log"
 	"strconv"
 	"time"
 )
 
 // /user
 func User(c *gin.Context) {
-	id, err := strconv.Atoi(c.Param("id"))
-
-	if err != nil {
-		c.AbortWithStatus(404)
-		return
-	}
-
-	tnx := db.DB.Txn(false)
-	raw, err := tnx.First("user", "id", uint32(id))
-	if err != nil || raw == nil {
-		c.AbortWithStatus(404)
-	}
-
-	resp := map[string]string{"status": raw.(*models.User).Last_name}
-	c.JSON(200, resp)
-	//c.Set(config.KeyResponse, resp)
-	//c.JSON(http.StatusOK, map[string]string{"error": err.Error()})
-
-	c.Abort()
+	EntityResponse(c, "user")
 }
 
 func CreateUser(c *gin.Context) {
 
 	var userRaw models.UserRaw
-	err := c.BindJSON(&userRaw)
+	err := c.BindJSON(userRaw)
 	if err != nil || userRaw.Id == 0 {
+		if err != nil {
+			log.Println(err)
+		}
 		c.AbortWithStatus(404)
 		return
 	}
 
-	tnx := db.DB.Txn(false)
-	raw, err := tnx.First("user", "id", userRaw.Id)
+	raw, err := FirstFromTable("user", userRaw.Id)
 	if err != nil || raw != nil {
+		log.Println(err)
 		c.AbortWithStatus(400)
 		return
 	}
 
 	birth_date := time.Unix(int64(userRaw.Birth_date), 0)
 
-	Age, _ := monthYearDiff(birth_date, time.Now())
+	Age, _ := modules.MonthYearDiff(birth_date, time.Now())
 	user := models.User{Id: userRaw.Id, Birth_date: birth_date, Email: userRaw.Email, Gender: userRaw.Gender, Last_name: userRaw.Last_name, Age: Age}
 
-	tnx = db.DB.Txn(true)
+	tnx := db.DB.Txn(true)
 	err = tnx.Insert("user", &user)
 	if err != nil {
+		log.Println(err)
 		c.AbortWithStatus(404)
 		return
 	}
@@ -82,18 +70,22 @@ func PostUser(c *gin.Context) {
 	var userRaw models.UserRaw
 	err = c.BindJSON(&userRaw)
 	if err != nil {
+		log.Println(err)
 		c.AbortWithStatus(404)
 		return
 	}
 
 	birth_date := time.Unix(int64(userRaw.Birth_date), 0)
 
-	Age, _ := monthYearDiff(birth_date, time.Now())
+	Age, _ := modules.MonthYearDiff(birth_date, time.Now())
 	user := models.User{Id: uint32(id), Birth_date: birth_date, Email: userRaw.Email, Gender: userRaw.Gender, Last_name: userRaw.Last_name, Age: Age}
 
 	tnx := db.DB.Txn(false)
 	raw, err := tnx.First("user", "id", uint32(id))
 	if err != nil || raw == nil {
+		if err != nil {
+			log.Println(err)
+		}
 		c.AbortWithStatus(404)
 		return
 	}
@@ -101,6 +93,7 @@ func PostUser(c *gin.Context) {
 	tnx = db.DB.Txn(true)
 	err = tnx.Insert("user", &user)
 	if err != nil {
+		log.Println(err)
 		c.AbortWithStatus(404)
 		return
 	}
@@ -110,19 +103,4 @@ func PostUser(c *gin.Context) {
 	c.JSON(200, resp)
 
 	c.Abort()
-}
-
-func monthYearDiff(a, b time.Time) (years, months int) {
-	m := a.Month()
-	for a.Before(b) {
-		a = a.Add(time.Hour * 24)
-		m2 := a.Month()
-		if m2 != m {
-			months++
-		}
-		m = m2
-	}
-	years = months / 12
-	months = months % 12
-	return
 }
