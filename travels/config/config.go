@@ -53,11 +53,12 @@ func init() {
 
 	//DB_HOST=DB_HOST;DB_PORT=1433;DB_NAME=DB_NAME;DB_USER=DB_USER;DB_PASSWORD=DB_PASSWORD;DB_MAX_OPEN_CONNS=100;DB_MAX_IDLE_CONNS=10;HTTP_INTERNAL_SERVER_PORT=8080
 
-	Config.DBConfig.Host = os.Getenv("DB_HOST")
-	DBPort, err := strconv.Atoi(os.Getenv("DB_PORT"))
-	if err != nil {
-		DBPort = 3360
-	}
+	Config.DBConfig.Host = "localhost" //os.Getenv("DB_HOST")
+	DBPort := 3360
+	//DBPort, err := strconv.Atoi(os.Getenv("DB_PORT"))
+	//if err != nil {
+	//	DBPort = 3360
+	//}
 
 	//maxOpenConns, err := strconv.Atoi(os.Getenv("DB_MAX_OPEN_CONNS"))
 	//if err != nil {
@@ -69,9 +70,9 @@ func init() {
 	//}
 
 	Config.DBConfig.Port = DBPort
-	Config.DBConfig.DBName = os.Getenv("DB_NAME")
-	Config.DBConfig.User = os.Getenv("DB_USER")
-	Config.DBConfig.Password = os.Getenv("DB_PASSWORD")
+	Config.DBConfig.DBName = "travels" //os.Getenv("DB_NAME")
+	Config.DBConfig.User = "admin"     //os.Getenv("DB_USER")
+	Config.DBConfig.Password = "12345" //os.Getenv("DB_PASSWORD")
 	//Config.DBConfig.MaxOpenConns = maxOpenConns
 	//Config.DBConfig.MaxIdleConns = maxIdleConns
 
@@ -80,7 +81,7 @@ func init() {
 		panic(err)
 	}
 
-	reform.NewDB(db.DB, mysql.Dialect, nil)
+	db.RDB = reform.NewDB(db.DB, mysql.Dialect, nil)
 
 	Config.Debug = getDefaultEnv("IS_DEBUG", "0") == "1"
 	if Config.Debug {

@@ -3,6 +3,7 @@ package db
 import (
 	"database/sql"
 	"fmt"
+	"gopkg.in/reform.v1"
 )
 import _ "github.com/go-sql-driver/mysql"
 
@@ -92,6 +93,7 @@ func Open() (*memdb.MemDB, error) {
 }*/
 
 var DB *sql.DB
+var RDB *reform.DB
 
 func Open(c *Config) (dbConnection *sql.DB, err error) {
 	dataSourceName := fmt.Sprint(c.Host, ":", c.Password, "@tcp(", c.Host, ":", c.Port, ")/", c.DBName) //"username:password@tcp(127.0.0.1:3306)/test"

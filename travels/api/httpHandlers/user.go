@@ -12,7 +12,33 @@ import (
 
 // /user
 func User(c *gin.Context) {
-	EntityResponse(c, "user")
+	id, err := strconv.Atoi(c.Param("id"))
+
+	if err != nil {
+		log.Println(err)
+		c.AbortWithStatus(404)
+		return
+	}
+
+	rec, err := db.RDB.FindByPrimaryKeyFrom(models.UserTable, uint32(id))
+	if err != nil || rec == nil {
+		if err != nil {
+			log.Println(err)
+		}
+		c.AbortWithStatus(404)
+		return
+	}
+
+	resp, err := rec.(*models.User).MarshalJSON()
+	if err != nil {
+		log.Println(err)
+		c.AbortWithStatus(404)
+		return
+	}
+
+	c.Data(200, modules.JSONContentType, resp)
+
+	c.Abort()
 }
 
 func CreateUser(c *gin.Context) {
@@ -27,8 +53,8 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 
-	raw, err := FirstFromTable("user", userRaw.Id)
-	if err != nil || raw != nil {
+	rec, err := db.RDB.FindByPrimaryKeyFrom(models.UserTable, uint32(userRaw.Id))
+	if err != nil || rec != nil {
 		log.Println(err)
 		c.AbortWithStatus(400)
 		return
@@ -39,14 +65,12 @@ func CreateUser(c *gin.Context) {
 	Age, _ := modules.MonthYearDiff(birth_date, time.Now())
 	user := models.User{Id: userRaw.Id, Birth_date: birth_date, Email: userRaw.Email, Gender: userRaw.Gender, Last_name: userRaw.Last_name, Age: Age}
 
-	tnx := db.DB.Txn(true)
-	err = tnx.Insert("user", &user)
+	err = db.RDB.Save(&user)
 	if err != nil {
 		log.Println(err)
 		c.AbortWithStatus(404)
 		return
 	}
-	tnx.Commit()
 
 	resp := map[string]string{}
 	c.JSON(200, resp)
@@ -80,9 +104,8 @@ func PostUser(c *gin.Context) {
 	Age, _ := modules.MonthYearDiff(birth_date, time.Now())
 	user := models.User{Id: uint32(id), Birth_date: birth_date, Email: userRaw.Email, Gender: userRaw.Gender, Last_name: userRaw.Last_name, Age: Age}
 
-	tnx := db.DB.Txn(false)
-	raw, err := tnx.First("user", "id", uint32(id))
-	if err != nil || raw == nil {
+	rec, err := db.RDB.FindByPrimaryKeyFrom(models.UserTable, uint32(id))
+	if err != nil || rec == nil {
 		if err != nil {
 			log.Println(err)
 		}
@@ -90,14 +113,12 @@ func PostUser(c *gin.Context) {
 		return
 	}
 
-	tnx = db.DB.Txn(true)
-	err = tnx.Insert("user", &user)
+	err = db.RDB.Save(&user)
 	if err != nil {
 		log.Println(err)
 		c.AbortWithStatus(404)
 		return
 	}
-	tnx.Commit()
 
 	resp := map[string]string{}
 	c.JSON(200, resp)

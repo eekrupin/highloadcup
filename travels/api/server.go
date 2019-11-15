@@ -42,7 +42,7 @@ func Run() {
 	}*/
 
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
-		v.RegisterValidation("emailCheck", emailCheck)
+		_ = v.RegisterValidation("emailCheck", emailCheck)
 	}
 
 	otherEP := r.Group("/")
