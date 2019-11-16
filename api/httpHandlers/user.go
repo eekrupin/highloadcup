@@ -1,10 +1,10 @@
 package httpHandlers
 
 import (
+	"github.com/eekrupin/hlc-travels/db"
+	"github.com/eekrupin/hlc-travels/models"
+	"github.com/eekrupin/hlc-travels/modules"
 	"github.com/gin-gonic/gin"
-	"highloadcup/travels/db"
-	"highloadcup/travels/models"
-	"highloadcup/travels/modules"
 	"log"
 	"strconv"
 	"time"
@@ -44,7 +44,7 @@ func User(c *gin.Context) {
 func CreateUser(c *gin.Context) {
 
 	var userRaw models.UserRaw
-	err := c.BindJSON(userRaw)
+	err := c.BindJSON(&userRaw)
 	if err != nil || userRaw.Id == 0 {
 		if err != nil {
 			log.Println(err)
@@ -54,7 +54,7 @@ func CreateUser(c *gin.Context) {
 	}
 
 	rec, err := db.RDB.FindByPrimaryKeyFrom(models.UserTable, uint32(userRaw.Id))
-	if err != nil || rec != nil {
+	if rec != nil {
 		log.Println(err)
 		c.AbortWithStatus(400)
 		return
@@ -63,7 +63,7 @@ func CreateUser(c *gin.Context) {
 	birth_date := time.Unix(int64(userRaw.Birth_date), 0)
 
 	Age, _ := modules.MonthYearDiff(birth_date, time.Now())
-	user := models.User{Id: userRaw.Id, Birth_date: birth_date, Email: userRaw.Email, Gender: userRaw.Gender, Last_name: userRaw.Last_name, Age: Age}
+	user := models.User{Id: userRaw.Id, Birth_date: birth_date, Email: userRaw.Email, Gender: userRaw.Gender, Last_name: userRaw.Last_name, First_name: userRaw.First_name, Age: Age}
 
 	err = db.RDB.Save(&user)
 	if err != nil {
@@ -102,7 +102,7 @@ func PostUser(c *gin.Context) {
 	birth_date := time.Unix(int64(userRaw.Birth_date), 0)
 
 	Age, _ := modules.MonthYearDiff(birth_date, time.Now())
-	user := models.User{Id: uint32(id), Birth_date: birth_date, Email: userRaw.Email, Gender: userRaw.Gender, Last_name: userRaw.Last_name, Age: Age}
+	user := models.User{Id: uint32(id), Birth_date: birth_date, Email: userRaw.Email, Gender: userRaw.Gender, Last_name: userRaw.Last_name, First_name: userRaw.First_name, Age: Age}
 
 	rec, err := db.RDB.FindByPrimaryKeyFrom(models.UserTable, uint32(id))
 	if err != nil || rec == nil {

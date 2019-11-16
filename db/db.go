@@ -4,6 +4,10 @@ import (
 	"database/sql"
 	"fmt"
 	"gopkg.in/reform.v1"
+	"io/ioutil"
+	"log"
+	"os"
+	"time"
 )
 import _ "github.com/go-sql-driver/mysql"
 
@@ -95,9 +99,20 @@ func Open() (*memdb.MemDB, error) {
 var DB *sql.DB
 var RDB *reform.DB
 
+var queryMap = make(map[string]string)
+
 func Open(c *Config) (dbConnection *sql.DB, err error) {
-	dataSourceName := fmt.Sprint(c.Host, ":", c.Password, "@tcp(", c.Host, ":", c.Port, ")/", c.DBName) //"username:password@tcp(127.0.0.1:3306)/test"
-	dbConnection, err = sql.Open("mysql", dataSourceName)
+	dataSourceName := fmt.Sprint(c.User, ":", c.Password, "@tcp(", c.Host, ":", c.Port, ")/", c.DBName, "?parseTime=true") //"username:password@tcp(127.0.0.1:3306)/test"
+	fmt.Println("dataSourceName: ", dataSourceName)
+	//dataSourceName = "root:12345@tcp(mysql:3306)/travels"
+	//fmt.Println("dataSourceName: ", dataSourceName)
+	for n := 1; n <= 5; n++ {
+		dbConnection, err = sql.Open("mysql", dataSourceName)
+		if err != nil {
+			time.Sleep(2 * time.Second)
+		}
+	}
+
 	if err != nil {
 		return nil, fmt.Errorf("Error while connecting to db %v", err)
 	}
@@ -119,3 +134,40 @@ func Open(c *Config) (dbConnection *sql.DB, err error) {
 //
 //	return dbConnection, nil
 //}
+
+func InitDB() {
+	queryInitDB := GetQuery("initDB")
+	var err error
+	for n := 1; n <= 5; n++ {
+		_, err = DB.Exec(queryInitDB)
+		if err != nil {
+			time.Sleep(500 * time.Millisecond)
+		}
+	}
+
+	if err != nil {
+		panic(err)
+	}
+
+}
+
+//func PanicExec(query string, args ...interface{}) sql.Result{
+//
+//}
+
+func GetQuery(query string) (value string) {
+	value = queryMap[query]
+	if value == "" {
+		fatalText := "On GetQuery '" + query + "' error: "
+		pwd, err := os.Getwd()
+		if err != nil {
+			log.Fatal(fatalText, err.Error())
+		}
+		b, err := ioutil.ReadFile(pwd + "//queries//" + query + ".sql")
+		if err != nil {
+			log.Fatal(fatalText, err.Error())
+		}
+		value = string(b)
+	}
+	return
+}

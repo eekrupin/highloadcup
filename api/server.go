@@ -16,9 +16,9 @@ import (
 	"github.com/semihalev/gin-stats"
 	"gopkg.in/go-playground/validator.v8"
 
-	"highloadcup/travels/api/httpHandlers"
-	"highloadcup/travels/api/middlewares"
-	"highloadcup/travels/config"
+	"github.com/eekrupin/hlc-travels/api/httpHandlers"
+	"github.com/eekrupin/hlc-travels/api/middlewares"
+	"github.com/eekrupin/hlc-travels/config"
 	//"github.com/opentracing/opentracing-go"
 )
 

@@ -1,0 +1,46 @@
+# Наследуемся от CentOS 7
+FROM centos:7
+
+# Выбираем рабочую папку
+WORKDIR /root
+
+# Устанавливаем wget и скачиваем Go
+RUN yum install -y wget && \
+    wget https://storage.googleapis.com/golang/go1.10.1.linux-amd64.tar.gz
+
+# Устанавливаем Go, создаем workspace и папку проекта
+RUN tar -C /usr/local -xzf go1.10.1.linux-amd64.tar.gz && \
+    mkdir go && mkdir go/src && mkdir go/bin && mkdir go/pkg && \
+    mkdir go/bin/github.com && \
+    mkdir go/bin/github.com/eekrupin && \
+    mkdir go/bin/github.com/eekrupin/hlc-travels && \
+    mkdir go/src/github.com && \
+    mkdir go/src/github.com/eekrupin && \
+    mkdir go/src/github.com/eekrupin/hlc-travels
+
+# Задаем переменные окружения для работы Go
+ENV PATH=${PATH}:/usr/local/go/bin GOROOT=/usr/local/go GOPATH=/root/go
+
+#ENV APPDIR $GOPATH/src/github.com/eekrupin/hlc-travels
+#WORKDIR ${APPDIR}
+
+COPY api go/src/github.com/eekrupin/hlc-travels/api
+COPY config go/src/github.com/eekrupin/hlc-travels/config
+COPY db go/src/github.com/eekrupin/hlc-travels/db
+COPY services go/src/github.com/eekrupin/hlc-travels/services
+COPY vendor go/src/github.com/eekrupin/hlc-travels/vendor
+COPY models go/src/github.com/eekrupin/hlc-travels/models
+COPY modules go/src/github.com/eekrupin/hlc-travels/modules
+COPY main.go go/src/github.com/eekrupin/hlc-travels
+
+# Копируем наш исходный main.go внутрь контейнера, в папку go/src/dumb
+#ADD main.go go/src/dumb
+
+# Компилируем и устанавливаем наш сервер
+RUN go build github.com/eekrupin/hlc-travels && go install github.com/eekrupin/hlc-travels
+
+# Открываем 80-й порт наружу
+EXPOSE 80
+
+# Запускаем наш сервер
+CMD ./go/bin/hlc-travels

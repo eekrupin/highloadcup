@@ -9,9 +9,9 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/eekrupin/hlc-travels/config"
+	"github.com/eekrupin/hlc-travels/services/loggerService"
 	"github.com/gin-gonic/gin"
-	"highloadcup/travels/config"
-	"highloadcup/travels/services/loggerService"
 )
 
 var (

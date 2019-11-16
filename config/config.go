@@ -7,9 +7,9 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/eekrupin/hlc-travels/db"
+	"github.com/eekrupin/hlc-travels/services/loggerService"
 	"github.com/joho/godotenv"
-	"highloadcup/travels/db"
-	"highloadcup/travels/services/loggerService"
 )
 
 type HTTPServerConfig struct {
@@ -41,20 +41,25 @@ func getDefaultEnv(key string, defaultValue string) string {
 
 func init() {
 	var err error
-	err = godotenv.Load()
-	if err != nil {
-		loggerService.GetMainLogger().Warn(nil, err.Error())
-	}
 
 	Config = AppConfig{
 		HTTPServer: &HTTPServerConfig{},
 		DBConfig:   &db.Config{},
 	}
 
+	Config.DBConfig.Host = os.Getenv("DB_HOST")
+	if Config.DBConfig.Host == "" {
+		Config.DBConfig.Host = "localhost"
+	}
+
+	err = godotenv.Load()
+	if err != nil {
+		loggerService.GetMainLogger().Warn(nil, err.Error())
+	}
+
 	//DB_HOST=DB_HOST;DB_PORT=1433;DB_NAME=DB_NAME;DB_USER=DB_USER;DB_PASSWORD=DB_PASSWORD;DB_MAX_OPEN_CONNS=100;DB_MAX_IDLE_CONNS=10;HTTP_INTERNAL_SERVER_PORT=8080
 
-	Config.DBConfig.Host = "localhost" //os.Getenv("DB_HOST")
-	DBPort := 3360
+	DBPort := 3306
 	//DBPort, err := strconv.Atoi(os.Getenv("DB_PORT"))
 	//if err != nil {
 	//	DBPort = 3360
@@ -71,7 +76,7 @@ func init() {
 
 	Config.DBConfig.Port = DBPort
 	Config.DBConfig.DBName = "travels" //os.Getenv("DB_NAME")
-	Config.DBConfig.User = "admin"     //os.Getenv("DB_USER")
+	Config.DBConfig.User = "root"      //os.Getenv("DB_USER")
 	Config.DBConfig.Password = "12345" //os.Getenv("DB_PASSWORD")
 	//Config.DBConfig.MaxOpenConns = maxOpenConns
 	//Config.DBConfig.MaxIdleConns = maxIdleConns
@@ -80,6 +85,8 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
+
+	db.InitDB()
 
 	db.RDB = reform.NewDB(db.DB, mysql.Dialect, nil)
 

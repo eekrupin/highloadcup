@@ -1,7 +1,7 @@
 package main
 
 import (
-	"highloadcup/travels/api"
+	"github.com/eekrupin/hlc-travels/api"
 )
 
 //func DumbHandler(writer http.ResponseWriter, request *http.Request) {
@@ -23,3 +23,7 @@ func main() {
 
 //docker build -t dumb .
 //docker run --rm -p 8080:80 -t dumb
+
+//docker-compose up --build --abort-on-container-exit
+
+//docker run --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=12345 -d mysql:5.7
