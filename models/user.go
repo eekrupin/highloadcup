@@ -15,7 +15,7 @@ type User struct {
 	Last_name  string    `reform:"last_name" json:"last_name"`
 	Gender     string    `reform:"gender" json:"gender"`
 	Birth_date time.Time `reform:"birth_date" json:"birth_date"`
-	Age        int       `reform:"age" json:"-"`
+	Age        int       //`reform:"age" json:"-"`
 }
 
 type UserRaw struct {

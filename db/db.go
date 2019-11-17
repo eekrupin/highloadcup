@@ -139,8 +139,16 @@ func InitDB() {
 	queryInitDB := GetQuery("initDB")
 	var err error
 	for n := 1; n <= 5; n++ {
-		_, err = DB.Exec(queryInitDB)
-		if err != nil {
+
+		stmt, err2 := DB.Prepare(queryInitDB)
+		err = err2
+		if err2 != nil {
+			time.Sleep(500 * time.Millisecond)
+			continue
+		}
+		_, err2 = stmt.Exec(queryInitDB)
+		err = err2
+		if err2 != nil {
 			time.Sleep(500 * time.Millisecond)
 		}
 	}

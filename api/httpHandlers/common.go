@@ -1,5 +1,49 @@
 package httpHandlers
 
+import (
+	"github.com/gin-gonic/gin"
+	"strconv"
+	"time"
+)
+
+func RequestStringParam(c *gin.Context, param string) (request interface{}, ok bool) {
+	if request, ok = c.Params.Get(param); ok && request == "" {
+		c.Keys["err"] = true
+	}
+	return request, ok
+}
+
+func RequestIntParam(c *gin.Context, param string) (request interface{}, ok bool) {
+	var err error
+	if str, ok := c.Params.Get(param); ok {
+		request, err = strconv.Atoi(str)
+		if err != nil {
+			c.Keys["err"] = true
+			return nil, false
+		}
+	}
+	return request, ok
+}
+
+func RequestAgeParamToTimeUnixViaCurrentTime(c *gin.Context, param string) (request interface{}, ok bool) {
+	if str, ok := c.Params.Get(param); ok {
+		year, err := strconv.Atoi(str)
+		if err != nil {
+			c.Keys["err"] = true
+			return nil, false
+		}
+		request = time.Now().AddDate(-year, 0, 0).Unix()
+	}
+	return request, ok
+}
+
+func addConvArgs(filter *string, args *[]interface{}, c *gin.Context, request string, convert func(*gin.Context, string) (interface{}, bool), filterString string) {
+	if fromDate, ok := convert(c, request); ok {
+		*filter = *filter + "/n" + filterString
+		*args = append(*args, fromDate)
+	}
+}
+
 //
 //import (
 //	"github.com/gin-gonic/gin"

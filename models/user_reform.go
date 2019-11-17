@@ -27,7 +27,7 @@ func (v *userTableType) Name() string {
 
 // Columns returns a new slice of column names for that view or table in SQL database.
 func (v *userTableType) Columns() []string {
-	return []string{"id", "email", "first_name", "last_name", "gender", "birth_date", "age"}
+	return []string{"id", "email", "first_name", "last_name", "gender", "birth_date"}
 }
 
 // NewStruct makes a new struct for that view or table.
@@ -47,20 +47,19 @@ func (v *userTableType) PKColumnIndex() uint {
 
 // UserTable represents user view or table in SQL database.
 var UserTable = &userTableType{
-	s: parse.StructInfo{Type: "User", SQLSchema: "", SQLName: "user", Fields: []parse.FieldInfo{{Name: "Id", Type: "uint32", Column: "id"}, {Name: "Email", Type: "string", Column: "email"}, {Name: "First_name", Type: "string", Column: "first_name"}, {Name: "Last_name", Type: "string", Column: "last_name"}, {Name: "Gender", Type: "string", Column: "gender"}, {Name: "Birth_date", Type: "time.Time", Column: "birth_date"}, {Name: "Age", Type: "int", Column: "age"}}, PKFieldIndex: 0},
+	s: parse.StructInfo{Type: "User", SQLSchema: "", SQLName: "user", Fields: []parse.FieldInfo{{Name: "Id", Type: "uint32", Column: "id"}, {Name: "Email", Type: "string", Column: "email"}, {Name: "First_name", Type: "string", Column: "first_name"}, {Name: "Last_name", Type: "string", Column: "last_name"}, {Name: "Gender", Type: "string", Column: "gender"}, {Name: "Birth_date", Type: "time.Time", Column: "birth_date"}}, PKFieldIndex: 0},
 	z: new(User).Values(),
 }
 
 // String returns a string representation of this struct or record.
 func (s User) String() string {
-	res := make([]string, 7)
+	res := make([]string, 6)
 	res[0] = "Id: " + reform.Inspect(s.Id, true)
 	res[1] = "Email: " + reform.Inspect(s.Email, true)
 	res[2] = "First_name: " + reform.Inspect(s.First_name, true)
 	res[3] = "Last_name: " + reform.Inspect(s.Last_name, true)
 	res[4] = "Gender: " + reform.Inspect(s.Gender, true)
 	res[5] = "Birth_date: " + reform.Inspect(s.Birth_date, true)
-	res[6] = "Age: " + reform.Inspect(s.Age, true)
 	return strings.Join(res, ", ")
 }
 
@@ -74,7 +73,6 @@ func (s *User) Values() []interface{} {
 		s.Last_name,
 		s.Gender,
 		s.Birth_date,
-		s.Age,
 	}
 }
 
@@ -88,7 +86,6 @@ func (s *User) Pointers() []interface{} {
 		&s.Last_name,
 		&s.Gender,
 		&s.Birth_date,
-		&s.Age,
 	}
 }
 

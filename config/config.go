@@ -81,6 +81,11 @@ func init() {
 	//Config.DBConfig.MaxOpenConns = maxOpenConns
 	//Config.DBConfig.MaxIdleConns = maxIdleConns
 
+	//db.SetConnMaxLifetime(500)
+	//db.SetMaxIdleConns(50)
+	//db.SetMaxOpenConns(10)
+	//db.Stats()
+
 	db.DB, err = db.Open(Config.DBConfig)
 	if err != nil {
 		panic(err)

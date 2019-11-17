@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"github.com/eekrupin/hlc-travels/db"
 	"log"
 	"net/http"
 	"os"
@@ -54,8 +55,16 @@ func Run() {
 		otherEP.POST("/health", httpHandlers.Health)
 
 		otherEP.GET("/user/:id", httpHandlers.User)
-
 		otherEP.POST("/user/:id", httpHandlers.PostUser)
+
+		otherEP.GET("/location/:id", httpHandlers.Location)
+		otherEP.POST("/location/:id", httpHandlers.PostLocation)
+
+		otherEP.GET("/visit/:id", httpHandlers.Visit)
+		otherEP.POST("/visit/:id", httpHandlers.PostVisit)
+
+		otherEP.GET("/locations/:id/avg", httpHandlers.Locations)
+		otherEP.GET("/users/:id/visits", httpHandlers.UserVisits)
 	}
 
 	srv := &http.Server{
@@ -76,6 +85,11 @@ func Run() {
 	signal.Notify(quit, os.Interrupt)
 	<-quit
 	log.Println("Shutdown Server ...")
+
+	err := db.DB.Close()
+	if err != nil {
+		log.Println("Error close DB: ", err)
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()

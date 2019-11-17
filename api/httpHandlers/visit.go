@@ -10,8 +10,8 @@ import (
 	"time"
 )
 
-// /user
-func User(c *gin.Context) {
+// /visit
+func Visit(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 
 	if err != nil {
@@ -20,7 +20,7 @@ func User(c *gin.Context) {
 		return
 	}
 
-	rec, err := db.RDB.FindByPrimaryKeyFrom(models.UserTable, uint32(id))
+	rec, err := db.RDB.FindByPrimaryKeyFrom(models.VisitTable, uint32(id))
 	if err != nil || rec == nil {
 		if err != nil {
 			log.Println(err)
@@ -29,9 +29,7 @@ func User(c *gin.Context) {
 		return
 	}
 
-	user := rec.(*models.User)
-	//user.Age, _ = modules.MonthYearDiff(user.Birth_date, time.Now())
-	resp, err := user.MarshalJSON()
+	resp, err := rec.(*models.Visit).MarshalJSON()
 	if err != nil {
 		log.Println(err)
 		c.AbortWithStatus(404)
@@ -43,11 +41,11 @@ func User(c *gin.Context) {
 	c.Abort()
 }
 
-func CreateUser(c *gin.Context) {
+func CreateVisit(c *gin.Context) {
 
-	var userRaw models.UserRaw
-	err := c.BindJSON(&userRaw)
-	if err != nil || userRaw.Id == 0 {
+	var visitRaw models.VisitRaw
+	err := c.BindJSON(&visitRaw)
+	if err != nil || visitRaw.Id == 0 {
 		if err != nil {
 			log.Println(err)
 		}
@@ -55,19 +53,18 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 
-	rec, err := db.RDB.FindByPrimaryKeyFrom(models.UserTable, uint32(userRaw.Id))
+	rec, err := db.RDB.FindByPrimaryKeyFrom(models.VisitTable, uint32(visitRaw.Id))
 	if rec != nil {
 		log.Println(err)
 		c.AbortWithStatus(400)
 		return
 	}
 
-	birth_date := time.Unix(int64(userRaw.Birth_date), 0)
+	visited_at := time.Unix(int64(visitRaw.Visited_at), 0)
 
-	//Age, _ := modules.MonthYearDiff(birth_date, time.Now())
-	user := models.User{Id: userRaw.Id, Birth_date: birth_date, Email: userRaw.Email, Gender: userRaw.Gender, Last_name: userRaw.Last_name, First_name: userRaw.First_name}
+	visit := models.Visit{Id: visitRaw.Id, Location: visitRaw.Location, User: visitRaw.User, Visited_at: visited_at, Mark: visitRaw.Mark}
 
-	err = db.RDB.Save(&user)
+	err = db.RDB.Save(&visit)
 	if err != nil {
 		log.Println(err)
 		c.AbortWithStatus(404)
@@ -80,10 +77,10 @@ func CreateUser(c *gin.Context) {
 	c.Abort()
 }
 
-func PostUser(c *gin.Context) {
+func PostVisit(c *gin.Context) {
 	key := c.Param("id")
 	if key == "new" {
-		CreateUser(c)
+		CreateVisit(c)
 		return
 	}
 
@@ -93,20 +90,19 @@ func PostUser(c *gin.Context) {
 		return
 	}
 
-	var userRaw models.UserRaw
-	err = c.BindJSON(&userRaw)
+	var visitRaw models.VisitRaw
+	err = c.BindJSON(&visitRaw)
 	if err != nil {
 		log.Println(err)
 		c.AbortWithStatus(404)
 		return
 	}
 
-	birth_date := time.Unix(int64(userRaw.Birth_date), 0)
+	visited_at := time.Unix(int64(visitRaw.Visited_at), 0)
 
-	//Age, _ := modules.MonthYearDiff(birth_date, time.Now())
-	user := models.User{Id: uint32(id), Birth_date: birth_date, Email: userRaw.Email, Gender: userRaw.Gender, Last_name: userRaw.Last_name, First_name: userRaw.First_name}
+	visit := models.Visit{Id: uint32(id), Location: visitRaw.Location, User: visitRaw.User, Visited_at: visited_at, Mark: visitRaw.Mark}
 
-	rec, err := db.RDB.FindByPrimaryKeyFrom(models.UserTable, uint32(id))
+	rec, err := db.RDB.FindByPrimaryKeyFrom(models.VisitTable, uint32(id))
 	if err != nil || rec == nil {
 		if err != nil {
 			log.Println(err)
@@ -115,7 +111,7 @@ func PostUser(c *gin.Context) {
 		return
 	}
 
-	err = db.RDB.Save(&user)
+	err = db.RDB.Save(&visit)
 	if err != nil {
 		log.Println(err)
 		c.AbortWithStatus(404)
