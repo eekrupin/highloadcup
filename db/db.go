@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strings"
 	"time"
 )
 import _ "github.com/go-sql-driver/mysql"
@@ -102,14 +103,20 @@ var RDB *reform.DB
 var queryMap = make(map[string]string)
 
 func Open(c *Config) (dbConnection *sql.DB, err error) {
-	dataSourceName := fmt.Sprint(c.User, ":", c.Password, "@tcp(", c.Host, ":", c.Port, ")/", c.DBName, "?parseTime=true") //"username:password@tcp(127.0.0.1:3306)/test"
+	dataSourceName := fmt.Sprint(c.User, ":", c.Password, "@tcp(", c.Host, ":", c.Port, ")/", "?parseTime=true&multiStatements=true") //"username:password@tcp(127.0.0.1:3306)/test"
 	fmt.Println("dataSourceName: ", dataSourceName)
 	//dataSourceName = "root:12345@tcp(mysql:3306)/travels"
 	//fmt.Println("dataSourceName: ", dataSourceName)
 	for n := 1; n <= 5; n++ {
 		dbConnection, err = sql.Open("mysql", dataSourceName)
 		if err != nil {
-			time.Sleep(2 * time.Second)
+			time.Sleep(1 * time.Second)
+			continue
+		}
+		err = dbConnection.Ping()
+		if err != nil {
+			time.Sleep(1 * time.Second)
+			continue
 		}
 	}
 
@@ -136,27 +143,31 @@ func Open(c *Config) (dbConnection *sql.DB, err error) {
 //}
 
 func InitDB() {
-	queryInitDB := GetQuery("initDB")
+
 	var err error
-	for n := 1; n <= 5; n++ {
-
-		stmt, err2 := DB.Prepare(queryInitDB)
-		err = err2
-		if err2 != nil {
-			time.Sleep(500 * time.Millisecond)
-			continue
-		}
-		_, err2 = stmt.Exec(queryInitDB)
-		err = err2
-		if err2 != nil {
-			time.Sleep(500 * time.Millisecond)
-		}
-	}
-
+	_, err = DB.Exec("CREATE SCHEMA IF NOT EXISTS `travels` DEFAULT CHARACTER SET utf8")
 	if err != nil {
 		panic(err)
 	}
 
+	_, err = DB.Exec("USE `travels`")
+	if err != nil {
+		panic(err)
+	}
+
+	queryInitDB := GetQuery("initDB")
+
+	queries := strings.Split(queryInitDB, ";")
+	for _, query := range queries {
+		query = strings.TrimSpace(query)
+		if query == "" {
+			continue
+		}
+		_, err = DB.Exec(query)
+		if err != nil {
+			panic(err)
+		}
+	}
 }
 
 //func PanicExec(query string, args ...interface{}) sql.Result{

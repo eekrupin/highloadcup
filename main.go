@@ -27,3 +27,4 @@ func main() {
 //docker-compose up --build --abort-on-container-exit
 
 //docker run --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=12345 -d mysql:5.7
+//--CREATE SCHEMA IF NOT EXISTS`travels` DEFAULT CHARACTER SET utf8 ;

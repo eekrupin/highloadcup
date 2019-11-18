@@ -1,3 +1,4 @@
+
 CREATE TABLE IF NOT EXISTS `travels`.`user` (
       `id` INT NOT NULL,
       `email` VARCHAR(200) NOT NULL,
