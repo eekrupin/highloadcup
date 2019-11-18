@@ -61,13 +61,9 @@ func CreateUser(c *gin.Context) {
 		c.AbortWithStatus(400)
 		return
 	}
+	user := models.UserFromRaw(&userRaw)
 
-	birth_date := time.Unix(int64(userRaw.Birth_date), 0)
-
-	//Age, _ := modules.MonthYearDiff(birth_date, time.Now())
-	user := models.User{Id: userRaw.Id, Birth_date: birth_date, Email: userRaw.Email, Gender: userRaw.Gender, Last_name: userRaw.Last_name, First_name: userRaw.First_name}
-
-	err = db.RDB.Save(&user)
+	err = db.RDB.Save(user)
 	if err != nil {
 		log.Println(err)
 		c.AbortWithStatus(404)

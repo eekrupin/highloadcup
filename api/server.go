@@ -54,14 +54,14 @@ func Run() {
 		otherEP.GET("/health", httpHandlers.Health)
 		otherEP.POST("/health", httpHandlers.Health)
 
-		otherEP.GET("/user/:id", httpHandlers.User)
-		otherEP.POST("/user/:id", httpHandlers.PostUser)
+		otherEP.GET("/users/:id", httpHandlers.User)
+		otherEP.POST("/users/:id", httpHandlers.PostUser)
 
-		otherEP.GET("/location/:id", httpHandlers.Location)
-		otherEP.POST("/location/:id", httpHandlers.PostLocation)
+		otherEP.GET("/locations/:id", httpHandlers.Location)
+		otherEP.POST("/locations/:id", httpHandlers.PostLocation)
 
-		otherEP.GET("/visit/:id", httpHandlers.Visit)
-		otherEP.POST("/visit/:id", httpHandlers.PostVisit)
+		otherEP.GET("/visits/:id", httpHandlers.Visit)
+		otherEP.POST("/visits/:id", httpHandlers.PostVisit)
 
 		otherEP.GET("/locations/:id/avg", httpHandlers.Locations)
 		otherEP.GET("/users/:id/visits", httpHandlers.UserVisits)

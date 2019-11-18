@@ -62,10 +62,10 @@ func UserVisits(c *gin.Context) {
 	inner join user as user
 		on visit.user = user.id
 	where location.id = ?
-# 		and visit.visited_at > ?
-# 		and visit.visited_at < ?
-# 		and location.country = ?
-# 		and location.distance < ?
+/*!  		and visit.visited_at > ?
+/*!  		and visit.visited_at < ?
+/*!  		and location.country = ?
+/*!  		and location.distance < ?
 		`
 	text = text + filter + "/n" + "ORDER BY visited_at"
 	rows, err := db.DB.Query(text, args)

@@ -50,15 +50,15 @@ func Locations(c *gin.Context) {
 	inner join user as user
 		on visit.user = user.id
 	where location.id = ?
-# 		and visit.visited_at > ?
-# 		and visit.visited_at < ?
-# 		and user.age > ?
-# 		and user.age < ?
-# 		and user.gender = ?
 		`
+	///*!  		and visit.visited_at > ?
+	///*!  		and visit.visited_at < ?
+	///*!  		and user.age > ?
+	///*!  		and user.age < ?
+	///*!  		and user.gender = ?
 	text = text + filter
 	var mark float32
-	err = db.DB.QueryRow(text, args).Scan(&mark)
+	err = db.DB.QueryRow(text, args...).Scan(&mark)
 	if err != nil {
 		log.Println("Error while get mark: ", err.Error())
 		c.AbortWithStatus(500)

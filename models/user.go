@@ -24,7 +24,7 @@ type UserRaw struct {
 	First_name string `json:"first_name" binding:"required"`
 	Last_name  string `json:"last_name" binding:"required"`
 	Gender     string `json:"gender" binding:"required"`
-	Birth_date uint32 `json:"birth_date" binding:"required"`
+	Birth_date int32  `json:"birth_date" binding:"required"`
 }
 
 func (u *User) MarshalJSON() ([]byte, error) {
@@ -36,4 +36,11 @@ func (u *User) MarshalJSON() ([]byte, error) {
 		Birth_date: u.Birth_date.Unix(),
 		Alias:      (*Alias)(u),
 	})
+}
+
+func UserFromRaw(userRaw *UserRaw) (user *User) {
+	birth_date := time.Unix(int64(userRaw.Birth_date), 0)
+	//Age, _ := modules.MonthYearDiff(birth_date, time.Now())
+	user = &User{Id: userRaw.Id, Birth_date: birth_date, Email: userRaw.Email, Gender: userRaw.Gender, Last_name: userRaw.Last_name, First_name: userRaw.First_name}
+	return user
 }

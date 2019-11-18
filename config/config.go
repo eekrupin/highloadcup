@@ -91,9 +91,9 @@ func init() {
 		panic(err)
 	}
 
-	db.InitDB()
-
 	db.RDB = reform.NewDB(db.DB, mysql.Dialect, nil)
+
+	db.InitDB()
 
 	Config.Debug = getDefaultEnv("IS_DEBUG", "0") == "1"
 	if Config.Debug {

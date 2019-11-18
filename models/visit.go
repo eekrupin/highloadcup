@@ -34,3 +34,10 @@ func (u *Visit) MarshalJSON() ([]byte, error) {
 		Alias:      (*Alias)(u),
 	})
 }
+
+func VisitFromRaw(visitRaw *VisitRaw) (user *Visit) {
+	visited_at := time.Unix(int64(visitRaw.Visited_at), 0)
+
+	visit := &Visit{Id: visitRaw.Id, Location: visitRaw.Location, User: visitRaw.User, Visited_at: visited_at, Mark: visitRaw.Mark}
+	return visit
+}

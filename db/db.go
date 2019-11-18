@@ -2,7 +2,10 @@ package db
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
+	"github.com/eekrupin/hlc-travels/models"
+	"github.com/eekrupin/hlc-travels/modules"
 	"gopkg.in/reform.v1"
 	"io/ioutil"
 	"log"
@@ -168,6 +171,87 @@ func InitDB() {
 			panic(err)
 		}
 	}
+	//LoadData()
+}
+
+func LoadData() {
+	pwd, err := os.Getwd()
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	files, err := modules.Unzip(pwd+"//tmp/data//data.zip", pwd+"//tmp//data//output")
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, file := range files {
+		b, err := ioutil.ReadFile(file)
+		if err != nil {
+			log.Fatal(err.Error())
+		}
+		if strings.Contains(file, "users") {
+			loadUsers(b)
+		} else if strings.Contains(file, "locations") {
+			loadLocations(b)
+		} else if strings.Contains(file, "visits") {
+			loadVisits(b)
+		}
+	}
+}
+
+func loadLocations(b []byte) {
+	var dataLocations dataLocations
+	err := json.Unmarshal(b, &dataLocations)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	for _, location := range dataLocations.Locations {
+		err = RDB.Save(location)
+		if err != nil {
+			log.Fatal(err.Error())
+		}
+	}
+}
+
+func loadUsers(b []byte) {
+	var dataUsers dataUsers
+	err := json.Unmarshal(b, &dataUsers)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	for _, userRaw := range dataUsers.Users {
+		user := models.UserFromRaw(userRaw)
+		err = RDB.Save(user)
+		if err != nil {
+			log.Fatal(err.Error())
+		}
+	}
+}
+
+func loadVisits(b []byte) {
+	var dataVisits dataVisits
+	err := json.Unmarshal(b, &dataVisits)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	for _, visitRaw := range dataVisits.Visits {
+		user := models.VisitFromRaw(visitRaw)
+		err = RDB.Save(user)
+		if err != nil {
+			log.Fatal(err.Error())
+		}
+	}
+}
+
+type dataLocations struct {
+	Locations []*models.Location
+}
+
+type dataUsers struct {
+	Users []*models.UserRaw
+}
+
+type dataVisits struct {
+	Visits []*models.VisitRaw
 }
 
 //func PanicExec(query string, args ...interface{}) sql.Result{
