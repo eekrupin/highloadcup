@@ -35,6 +35,22 @@ func RequestIntParam(c *gin.Context, param string) (request interface{}, ok bool
 	}
 }
 
+func RequestIntParamAsTime(c *gin.Context, param string) (request interface{}, ok bool) {
+	values := c.Request.URL.Query()
+	_, ok = values[param]
+	str := values.Get(param)
+	if ok {
+		timeInt, err := strconv.ParseInt(str, 10, 64)
+		if err != nil {
+			c.Keys["err"] = true
+			return nil, false
+		}
+		return time.Unix(timeInt, 0), ok
+	} else {
+		return nil, false
+	}
+}
+
 func RequestAgeParamToTimeUnixViaCurrentTime(c *gin.Context, param string) (request interface{}, ok bool) {
 	values := c.Request.URL.Query()
 	_, ok = values[param]
@@ -45,7 +61,7 @@ func RequestAgeParamToTimeUnixViaCurrentTime(c *gin.Context, param string) (requ
 			c.Keys["err"] = true
 			return nil, false
 		}
-		request = time.Now().AddDate(-year, 0, 0).Unix()
+		request = time.Now().AddDate(-year, 0, 0)
 		return request, ok
 	} else {
 		return nil, false

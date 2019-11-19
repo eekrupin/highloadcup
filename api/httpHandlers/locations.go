@@ -31,8 +31,8 @@ func Locations(c *gin.Context) {
 	filter := ""
 	var args []interface{}
 	args = append(args, id)
-	addConvArgs(&filter, &args, c, "fromDate", RequestIntParam, "and visit.visited_at > ?")
-	addConvArgs(&filter, &args, c, "toDate", RequestIntParam, "and visit.visited_at < ?")
+	addConvArgs(&filter, &args, c, "fromDate", RequestIntParamAsTime, "and visit.visited_at > ?")
+	addConvArgs(&filter, &args, c, "toDate", RequestIntParamAsTime, "and visit.visited_at < ?")
 	addConvArgs(&filter, &args, c, "gender", RequestStringParam, "and user.gender = ?")
 	addConvArgs(&filter, &args, c, "fromAge", RequestAgeParamToTimeUnixViaCurrentTime, "and user.birth_date < ?")
 	addConvArgs(&filter, &args, c, "toAge", RequestAgeParamToTimeUnixViaCurrentTime, "and user.birth_date > ?")
@@ -51,12 +51,12 @@ func Locations(c *gin.Context) {
 	inner join user as user
 		on visit.user = user.id
 	where location.id = ?
+	#  		and visit.visited_at > ?
+	#  		and visit.visited_at < ?
+	#  		and user.age > ?
+	#  		and user.age < ?
+	#  		and user.gender = ?
 		`
-	///*!  		and visit.visited_at > ?
-	///*!  		and visit.visited_at < ?
-	///*!  		and user.age > ?
-	///*!  		and user.age < ?
-	///*!  		and user.gender = ?
 	text = text + filter
 	var mark sql.NullFloat64
 	err = db.DB.QueryRow(text, args...).Scan(&mark)
@@ -72,8 +72,8 @@ func Locations(c *gin.Context) {
 	//	return
 	//}
 
-	resp := map[string]sql.NullFloat64{}
-	resp["AVG"] = mark
+	resp := map[string]float64{}
+	resp["AVG"] = mark.Float64
 	c.JSON(200, resp)
 
 	c.Abort()

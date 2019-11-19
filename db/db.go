@@ -11,6 +11,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"sync"
 	"time"
 )
 import _ "github.com/go-sql-driver/mysql"
@@ -105,9 +106,9 @@ var RDB *reform.DB
 
 var queryMap = make(map[string]string)
 
-func Open(c *Config) (dbConnection *sql.DB, err error) {
-	dataSourceName := fmt.Sprint(c.User, ":", c.Password, "@tcp(", c.Host, ":", c.Port, ")/", "?parseTime=true&multiStatements=true") //"username:password@tcp(127.0.0.1:3306)/test"
-	fmt.Println("dataSourceName: ", dataSourceName)
+func Open(c *Config, dataBase string) (dbConnection *sql.DB, err error) {
+	dataSourceName := fmt.Sprint(c.User, ":", c.Password, "@tcp(", c.Host, ":", c.Port, ")/", dataBase, "?parseTime=true&multiStatements=true&clientFoundRows=true") //"username:password@tcp(127.0.0.1:3306)/test"
+	log.Println("dataSourceName: ", dataSourceName)
 	//dataSourceName = "root:12345@tcp(mysql:3306)/travels"
 	//fmt.Println("dataSourceName: ", dataSourceName)
 	for n := 1; n <= 5; n++ {
@@ -145,18 +146,21 @@ func Open(c *Config) (dbConnection *sql.DB, err error) {
 //	return dbConnection, nil
 //}
 
+func InitSchema() {
+	_, err := DB.Exec("CREATE SCHEMA IF NOT EXISTS `travels` DEFAULT CHARACTER SET utf8")
+	if err != nil {
+		panic(err)
+	}
+}
+
 func InitDB() {
 
 	var err error
-	_, err = DB.Exec("CREATE SCHEMA IF NOT EXISTS `travels` DEFAULT CHARACTER SET utf8")
-	if err != nil {
-		panic(err)
-	}
 
-	_, err = DB.Exec("USE `travels`")
-	if err != nil {
-		panic(err)
-	}
+	//_, err = DB.Exec("USE `travels`")
+	//if err != nil {
+	//	panic(err)
+	//}
 
 	queryInitDB := GetQuery("initDB")
 
@@ -183,63 +187,85 @@ func LoadData() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	var wg sync.WaitGroup
 	for _, file := range files {
 		b, err := ioutil.ReadFile(file)
 		if err != nil {
 			log.Fatal(err.Error())
 		}
 		if strings.Contains(file, "users") {
-			loadUsers(b)
+			wg.Add(1)
+			go loadUsers(b, &wg)
 		} else if strings.Contains(file, "locations") {
-			loadLocations(b)
+			wg.Add(1)
+			go loadLocations(b, &wg)
 		} else if strings.Contains(file, "visits") {
-			loadVisits(b)
+			wg.Add(1)
+			go loadVisits(b, &wg)
 		}
 	}
+	wg.Wait()
 	log.Println("Load init data complete")
 }
 
-func loadLocations(b []byte) {
+func loadLocations(b []byte, wg *sync.WaitGroup) {
 	var dataLocations dataLocations
 	err := json.Unmarshal(b, &dataLocations)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 	for _, location := range dataLocations.Locations {
-		err = RDB.Save(location)
-		if err != nil {
-			log.Fatal(err.Error())
-		}
+		loadLocation(location, wg)
+	}
+	wg.Done()
+}
+
+func loadLocation(location *models.Location, wg *sync.WaitGroup) {
+	err := RDB.Save(location)
+	if err != nil {
+		log.Fatal(err.Error())
 	}
 }
 
-func loadUsers(b []byte) {
+func loadUsers(b []byte, wg *sync.WaitGroup) {
 	var dataUsers dataUsers
 	err := json.Unmarshal(b, &dataUsers)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 	for _, userRaw := range dataUsers.Users {
-		user := models.UserFromRaw(userRaw)
-		err = RDB.Save(user)
-		if err != nil {
-			log.Fatal(err.Error())
-		}
+		loadUser(userRaw, wg)
 	}
+	wg.Done()
 }
 
-func loadVisits(b []byte) {
+func loadUser(userRaw *models.UserRaw, wg *sync.WaitGroup) {
+	user := models.UserFromRaw(userRaw)
+	err := RDB.Save(user)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+}
+
+func loadVisits(b []byte, wg *sync.WaitGroup) {
 	var dataVisits dataVisits
 	err := json.Unmarshal(b, &dataVisits)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 	for _, visitRaw := range dataVisits.Visits {
-		user := models.VisitFromRaw(visitRaw)
-		err = RDB.Save(user)
-		if err != nil {
-			log.Fatal(err.Error())
-		}
+		loadVisit(visitRaw, wg)
+	}
+	wg.Done()
+}
+
+func loadVisit(visitRaw *models.VisitRaw, wg *sync.WaitGroup) {
+	visit := models.VisitFromRaw(visitRaw)
+	err := RDB.Save(visit)
+	if err != nil {
+		log.Fatal(err.Error())
 	}
 }
 

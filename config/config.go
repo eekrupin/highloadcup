@@ -86,7 +86,13 @@ func init() {
 	//db.SetMaxOpenConns(10)
 	//db.Stats()
 
-	db.DB, err = db.Open(Config.DBConfig)
+	db.DB, err = db.Open(Config.DBConfig, "")
+	if err != nil {
+		panic(err)
+	}
+	db.InitSchema()
+	_ = db.DB.Close()
+	db.DB, err = db.Open(Config.DBConfig, "travels")
 	if err != nil {
 		panic(err)
 	}

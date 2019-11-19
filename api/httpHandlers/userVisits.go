@@ -6,12 +6,14 @@ import (
 	"github.com/gin-gonic/gin"
 	"log"
 	"strconv"
+	"time"
 )
 
 type UserVisit struct {
-	Mark       uint   `json:"mark"`
-	Visited_at uint32 `json:"visited_at"`
-	Place      string `json:"place"`
+	Mark           uint      `json:"mark"`
+	Visited_at     time.Time `json:"-"`
+	Visited_at_raw int64     `json:"visited_at"`
+	Place          string    `json:"place"`
 }
 
 // /userVisits
@@ -41,8 +43,8 @@ func UserVisits(c *gin.Context) {
 	filter := ""
 	var args []interface{}
 	args = append(args, id)
-	addConvArgs(&filter, &args, c, "fromDate", RequestIntParam, "and visit.visited_at > ?")
-	addConvArgs(&filter, &args, c, "toDate", RequestIntParam, "and visit.visited_at < ?")
+	addConvArgs(&filter, &args, c, "fromDate", RequestIntParamAsTime, "and visit.visited_at > ?")
+	addConvArgs(&filter, &args, c, "toDate", RequestIntParamAsTime, "and visit.visited_at < ?")
 	addConvArgs(&filter, &args, c, "country", RequestStringParam, "and location.country = ?")
 	addConvArgs(&filter, &args, c, "toDistance", RequestIntParam, "and location.distance < ?")
 
@@ -54,7 +56,7 @@ func UserVisits(c *gin.Context) {
 	text := `SELECT 
        visit.mark as mark,
        visit.visited_at as visited_at,
-       visit.place as place
+       location.place as place
 	from
 		visit as visit
 	inner join location as location
@@ -62,28 +64,29 @@ func UserVisits(c *gin.Context) {
 	inner join user as user
 		on visit.user = user.id
 	where location.id = ?
-/*!  		and visit.visited_at > ?
-/*!  		and visit.visited_at < ?
-/*!  		and location.country = ?
-/*!  		and location.distance < ?
+#  		and visit.visited_at > ?
+#  		and visit.visited_at < ?
+#  		and location.country = ?
+#  		and location.distance < ?
 		`
-	text = text + filter + "/n" + "ORDER BY visited_at"
-	rows, err := db.DB.Query(text, args)
+	text = text + filter + " " + "ORDER BY visited_at"
+	rows, err := db.DB.Query(text, args...)
 	if err != nil {
 		log.Println("Error while get UserVisits: ", err.Error())
 		c.AbortWithStatus(500)
 		return
 	}
 
-	var visits []interface{}
+	var visits []UserVisit
 	for rows.Next() {
 		var userVisit UserVisit
-		err = rows.Scan(&userVisit)
+		err = rows.Scan(&userVisit.Mark, &userVisit.Visited_at, &userVisit.Place)
 		if err != nil {
 			log.Println("Error while Scan UserVisit: ", err.Error())
 			c.AbortWithStatus(500)
 			return
 		}
+		userVisit.Visited_at_raw = userVisit.Visited_at.Unix()
 		visits = append(visits, userVisit)
 	}
 
