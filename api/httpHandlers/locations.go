@@ -1,6 +1,7 @@
 package httpHandlers
 
 import (
+	"database/sql"
 	"github.com/eekrupin/hlc-travels/db"
 	"github.com/eekrupin/hlc-travels/models"
 	"github.com/gin-gonic/gin"
@@ -57,9 +58,9 @@ func Locations(c *gin.Context) {
 	///*!  		and user.age < ?
 	///*!  		and user.gender = ?
 	text = text + filter
-	var mark float32
+	var mark sql.NullFloat64
 	err = db.DB.QueryRow(text, args...).Scan(&mark)
-	if err != nil {
+	if err != nil && err != sql.ErrNoRows {
 		log.Println("Error while get mark: ", err.Error())
 		c.AbortWithStatus(500)
 		return
@@ -71,7 +72,7 @@ func Locations(c *gin.Context) {
 	//	return
 	//}
 
-	resp := map[string]float32{}
+	resp := map[string]sql.NullFloat64{}
 	resp["AVG"] = mark
 	c.JSON(200, resp)
 

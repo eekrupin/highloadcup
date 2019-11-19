@@ -196,6 +196,7 @@ func LoadData() {
 			loadVisits(b)
 		}
 	}
+	log.Println("Load init data complete")
 }
 
 func loadLocations(b []byte) {
