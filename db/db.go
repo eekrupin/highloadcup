@@ -128,6 +128,8 @@ func Open(c *Config, dataBase string) (dbConnection *sql.DB, err error) {
 		return nil, fmt.Errorf("Error while connecting to db %v", err)
 	}
 
+	dbConnection.SetMaxOpenConns(c.MaxOpenConns)
+
 	return dbConnection, nil
 }
 
@@ -153,7 +155,7 @@ func InitSchema() {
 	}
 }
 
-func InitDB() {
+func InitDB(maxWorkers int) {
 
 	var err error
 
@@ -175,10 +177,10 @@ func InitDB() {
 			panic(err)
 		}
 	}
-	//LoadData()
+	LoadData(maxWorkers)
 }
 
-func LoadData() {
+func LoadData(maxWorkers int) {
 	pwd, err := os.Getwd()
 	if err != nil {
 		log.Fatal(err.Error())
@@ -188,6 +190,7 @@ func LoadData() {
 		log.Fatal(err)
 	}
 
+	c := make(chan int, maxWorkers)
 	var wg sync.WaitGroup
 	for _, file := range files {
 		b, err := ioutil.ReadFile(file)
@@ -195,78 +198,65 @@ func LoadData() {
 			log.Fatal(err.Error())
 		}
 		if strings.Contains(file, "users") {
-			wg.Add(1)
-			go loadUsers(b, &wg)
+			loadUsers(b, &wg, c)
 		} else if strings.Contains(file, "locations") {
 			wg.Add(1)
-			go loadLocations(b, &wg)
+			loadLocations(b, &wg, c)
 		} else if strings.Contains(file, "visits") {
 			wg.Add(1)
-			go loadVisits(b, &wg)
+			loadVisits(b, &wg, c)
 		}
 	}
 	wg.Wait()
 	log.Println("Load init data complete")
 }
 
-func loadLocations(b []byte, wg *sync.WaitGroup) {
+func loadLocations(b []byte, wg *sync.WaitGroup, c chan int) {
 	var dataLocations dataLocations
 	err := json.Unmarshal(b, &dataLocations)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 	for _, location := range dataLocations.Locations {
-		loadLocation(location, wg)
-	}
-	wg.Done()
-}
-
-func loadLocation(location *models.Location, wg *sync.WaitGroup) {
-	err := RDB.Save(location)
-	if err != nil {
-		log.Fatal(err.Error())
+		wg.Add(1)
+		go loadRecord(location, wg, c)
 	}
 }
 
-func loadUsers(b []byte, wg *sync.WaitGroup) {
+func loadUsers(b []byte, wg *sync.WaitGroup, c chan int) {
 	var dataUsers dataUsers
 	err := json.Unmarshal(b, &dataUsers)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 	for _, userRaw := range dataUsers.Users {
-		loadUser(userRaw, wg)
+		user := models.UserFromRaw(userRaw)
+		wg.Add(1)
+		go loadRecord(user, wg, c)
 	}
-	wg.Done()
 }
 
-func loadUser(userRaw *models.UserRaw, wg *sync.WaitGroup) {
-	user := models.UserFromRaw(userRaw)
-	err := RDB.Save(user)
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
-}
-
-func loadVisits(b []byte, wg *sync.WaitGroup) {
+func loadVisits(b []byte, wg *sync.WaitGroup, c chan int) {
 	var dataVisits dataVisits
 	err := json.Unmarshal(b, &dataVisits)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 	for _, visitRaw := range dataVisits.Visits {
-		loadVisit(visitRaw, wg)
+		visit := models.VisitFromRaw(visitRaw)
+		wg.Add(1)
+		loadRecord(visit, wg, c)
 	}
-	wg.Done()
 }
 
-func loadVisit(visitRaw *models.VisitRaw, wg *sync.WaitGroup) {
-	visit := models.VisitFromRaw(visitRaw)
-	err := RDB.Save(visit)
+func loadRecord(record reform.Record, wg *sync.WaitGroup, c chan int) {
+	c <- 1
+	err := RDB.Save(record)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
+	<-c
+	wg.Done()
 }
 
 type dataLocations struct {

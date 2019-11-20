@@ -65,10 +65,10 @@ func init() {
 	//	DBPort = 3360
 	//}
 
-	//maxOpenConns, err := strconv.Atoi(os.Getenv("DB_MAX_OPEN_CONNS"))
-	//if err != nil {
-	//	panic("Variable DB_MAX_OPEN_CONNS from file .env must be int")
-	//}
+	maxOpenConns, err := strconv.Atoi(os.Getenv("DB_MAX_OPEN_CONNS"))
+	if err != nil {
+		panic("Variable DB_MAX_OPEN_CONNS from file .env must be int")
+	}
 	//maxIdleConns, err := strconv.Atoi(os.Getenv("DB_MAX_IDLE_CONNS"))
 	//if err != nil {
 	//	panic("Variable DB_MAX_IDLE_CONNS from file .env must be int")
@@ -78,7 +78,7 @@ func init() {
 	Config.DBConfig.DBName = "travels" //os.Getenv("DB_NAME")
 	Config.DBConfig.User = "root"      //os.Getenv("DB_USER")
 	Config.DBConfig.Password = "12345" //os.Getenv("DB_PASSWORD")
-	//Config.DBConfig.MaxOpenConns = maxOpenConns
+	Config.DBConfig.MaxOpenConns = maxOpenConns
 	//Config.DBConfig.MaxIdleConns = maxIdleConns
 
 	//db.SetConnMaxLifetime(500)
@@ -99,7 +99,7 @@ func init() {
 
 	db.RDB = reform.NewDB(db.DB, mysql.Dialect, nil)
 
-	db.InitDB()
+	db.InitDB(maxOpenConns)
 
 	Config.Debug = getDefaultEnv("IS_DEBUG", "0") == "1"
 	if Config.Debug {
