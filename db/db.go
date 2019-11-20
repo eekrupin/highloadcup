@@ -198,12 +198,13 @@ func LoadData(maxWorkers int) {
 			log.Fatal(err.Error())
 		}
 		if strings.Contains(file, "users") {
+			//wg.Add(1)
 			loadUsers(b, &wg, c)
 		} else if strings.Contains(file, "locations") {
-			wg.Add(1)
+			//wg.Add(1)
 			loadLocations(b, &wg, c)
 		} else if strings.Contains(file, "visits") {
-			wg.Add(1)
+			//wg.Add(1)
 			loadVisits(b, &wg, c)
 		}
 	}
@@ -213,7 +214,9 @@ func LoadData(maxWorkers int) {
 
 func loadLocations(b []byte, wg *sync.WaitGroup, c chan int) {
 	var dataLocations dataLocations
+	//start := time.Now()
 	err := json.Unmarshal(b, &dataLocations)
+	//log.Println("Dur loadUsers: ", time.Since(start).Seconds())
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -221,6 +224,7 @@ func loadLocations(b []byte, wg *sync.WaitGroup, c chan int) {
 		wg.Add(1)
 		go loadRecord(location, wg, c)
 	}
+	//wg.Done()
 }
 
 func loadUsers(b []byte, wg *sync.WaitGroup, c chan int) {
@@ -229,11 +233,13 @@ func loadUsers(b []byte, wg *sync.WaitGroup, c chan int) {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
+	//start := time.Now()
 	for _, userRaw := range dataUsers.Users {
 		user := models.UserFromRaw(userRaw)
 		wg.Add(1)
 		go loadRecord(user, wg, c)
 	}
+	//log.Println("Dur loadUsers: ", time.Since(start).Seconds())
 }
 
 func loadVisits(b []byte, wg *sync.WaitGroup, c chan int) {
@@ -245,17 +251,20 @@ func loadVisits(b []byte, wg *sync.WaitGroup, c chan int) {
 	for _, visitRaw := range dataVisits.Visits {
 		visit := models.VisitFromRaw(visitRaw)
 		wg.Add(1)
-		loadRecord(visit, wg, c)
+		go loadRecord(visit, wg, c)
 	}
+	//wg.Done()
 }
 
 func loadRecord(record reform.Record, wg *sync.WaitGroup, c chan int) {
+	//start := time.Now()
 	c <- 1
 	err := RDB.Save(record)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 	<-c
+	//log.Println("Dur loadUsers: ", time.Since(start).Seconds())
 	wg.Done()
 }
 

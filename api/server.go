@@ -21,6 +21,7 @@ import (
 	"github.com/eekrupin/hlc-travels/api/middlewares"
 	"github.com/eekrupin/hlc-travels/config"
 	//"github.com/opentracing/opentracing-go"
+	_ "net/http/pprof"
 )
 
 func Run() {
