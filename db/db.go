@@ -187,7 +187,8 @@ func LoadData(maxWorkers int) {
 	}
 	files, err := modules.Unzip(pwd+"//tmp/data//data.zip", pwd+"//tmp//data//output")
 	if err != nil {
-		log.Fatal(err)
+		log.Println("Skipped load data: ", err)
+		return
 	}
 
 	c := make(chan int, maxWorkers)

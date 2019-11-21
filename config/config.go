@@ -49,7 +49,8 @@ func init() {
 
 	Config.DBConfig.Host = os.Getenv("DB_HOST")
 	if Config.DBConfig.Host == "" {
-		Config.DBConfig.Host = "localhost"
+		//Config.DBConfig.Host = "localhost"
+		//Config.DBConfig.Host = "mysql"
 	}
 
 	err = godotenv.Load()
@@ -67,6 +68,7 @@ func init() {
 
 	maxOpenConns, err := strconv.Atoi(os.Getenv("DB_MAX_OPEN_CONNS"))
 	if err != nil {
+		//maxOpenConns = 120
 		panic("Variable DB_MAX_OPEN_CONNS from file .env must be int")
 	}
 	//maxIdleConns, err := strconv.Atoi(os.Getenv("DB_MAX_IDLE_CONNS"))
